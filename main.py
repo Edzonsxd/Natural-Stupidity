@@ -1,0 +1,1 @@
+print("mākslīgais intelekts apēdīs manas brokastis")
