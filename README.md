@@ -15,7 +15,7 @@
    	* `0 0` → `1` un dod **1 punktu spēlētāja** punktu skaitam; 
 	* `0 1` → `0` un dod **1 punktu pretinieka** punktu skaitam;
 	* `1 0` → `1` un **atņem 1 punktu no pretinieka** punktu skaita;
-	* `1 1` → `0` un **____________ spēlētāja** punktu skaitam.
+	* `1 1` → `0` un **atņem 1 punktu no spēlētāja** punktu skaita.
 
 	Katrā gājienā var aizvietot tikai vienu skaitļu pāri. 
 
@@ -25,7 +25,7 @@
 
 -------------------------------------------------------------
 
-> (Nokopēts pa tiešu no ORTUSa) Izstrādājot programmatūru, studentu komandai obligāti ir jārealizē: 
+> (Nokopēts pa tiešo no ORTUSa) Izstrādājot programmatūru, studentu komandai obligāti ir jārealizē: 
 > * Spēles koka vai tā daļas glabāšana datu struktūras veidā (klases, saistītie saraksti).
 >
 > * Spēles koka vai tā daļas ģenerēšana atkarībā no spēles sarežģītības un studentu komandai pieejamiem skaitļošanas resursiem;
