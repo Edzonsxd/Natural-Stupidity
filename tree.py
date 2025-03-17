@@ -5,7 +5,7 @@ class GameStateNode:
         self.state = state  # Spēles stāvoklis
         self.move = move    # Gājiens no iepriešējā stāvokļa uz šo stāvokli
         self.children = []  # Pēcteču saraksts
-        self.depth = depth  # Koka dziļums
+        self.depth = depth  # Virsotnes dziļums kokā
 
     def add_child(self, node):
         self.children.append(node)
@@ -39,8 +39,8 @@ class GameStateTree:
     def print_tree(self, node=None, indent=""):
         if node is None: 
             node = self.root
-        # D - dziļums, M - gājiens (pēc kārtas no iespējamajiem), B - Laukums, P - punkti
-        print(f"{indent}D: {node.depth} - M: {node.move} - B: {node.state.board} P: {node.state.points}")
+        # D - dziļums, G - gājiens (pēc kārtas no iespējamajiem), L - Laukums, P - punkti
+        print(f"{indent}D: {node.depth} - G: {node.move} - L: {node.state.board} P: {node.state.points}")
         for child in node.children:
             self.print_tree(child, indent + "    ")    
 
