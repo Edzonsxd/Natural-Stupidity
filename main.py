@@ -1,10 +1,17 @@
 from gamestate import GameState
+from tree import GameStateTree
 from algo import random_move
 
 game_length = 15 # Cik ciparu virkne tiek ģenerēta
 p1_start = True # Vai spēli sāk spēlētājs
+tree_depth = 2 # Koka maksimālais dziļums
 
-game = GameState(game_length, p1_start)
+game = GameState(p1_start, game_length)
+game_tree = GameStateTree()
+game_tree.create_tree(game, tree_depth)
+
+print(f"Spēles koks ar dziļumu: {tree_depth}")
+game_tree.print_tree()
 
 print(f"Spēli sāk { 'Spēlētājs' if p1_start else 'dators' }")
 print("-----------------")

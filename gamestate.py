@@ -1,10 +1,10 @@
 import random
 
 class GameState:
-    def __init__(self, game_length, p1_turn, debug=False):
+    def __init__(self, p1_turn, game_length=0, debug=False):
         if debug:
             # STATISKA ciparu virkne debugošanai
-            self.board = [0, 1, 0, 1, 0, 1, 1, 0, 0]
+            self.board = [0, 1, 0, 1, 0]
         else:
             # Uzģenērē ciparu virkni spēles sākumam
             self.board = [ random.randint(0, 1) for i in range(game_length) ]  
@@ -16,6 +16,15 @@ class GameState:
     def print_state(self):
         print(self.board)
         print(self.points)
+
+    # Metode sevis klonēšanai, nepieciešama kokam
+    def clone_state(self):
+        new_state = GameState(self.p1_turn) # Inicializē jaunu, tukšu spēles stāvokli 
+        # Iekopē visus atribūtus
+        new_state.board = self.board.copy()
+        new_state.points = self.points.copy()
+        new_state.p1_turn = self.p1_turn
+        return new_state
 
     def available_moves(self):
         board = self.board
