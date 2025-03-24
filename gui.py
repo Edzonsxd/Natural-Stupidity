@@ -1,164 +1,173 @@
 import tkinter as tk
-import random
-from gamestate import GameStateNode
-import algo
+from tkinter import messagebox
+from gamestate import GameState
+from tree import GameStateTree
+from algo import random_move
+from algo import alphabeta  # make sure this is imported
+from tree import GameStateNode
 
-# Global game state variables
-sequence = []
-p1_points = 0
-p2_points = 0
-current_player = 0  # 0: human, 1: computer
-selected_index = None
+class NumberGameGUI:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Skaitļu spēle")
+        self.main_menu()
+        self.history = []  # Stores tuples like ("Spēlētājs", move, state)
 
-root = tk.Tk()
-root.title("Natural Stupidity Game")
+    def main_menu(self):
+        # Clear any existing widgets
+        self.clear_window()
 
-def generate_sequence(length):
-    return [random.choice([0, 1]) for _ in range(length)]
+        tk.Label(self.root, text="Laipni lūdzam skaitļu spēlē!", font=("Helvetica", 16)).pack(pady=20)
+        tk.Button(self.root, text="Sākt spēli", width=20, command=self.setup_game).pack(pady=10)
+        tk.Button(self.root, text="Iziet", width=20, command=self.root.quit).pack(pady=10)
 
-def update_display():
-    for widget in frame_buttons.winfo_children():
-        widget.destroy()
-    for i, num in enumerate(sequence):
-        btn = tk.Button(frame_buttons, text=str(num), font=("Arial", 20), width=4,
-                        command=lambda i=i: on_click(i))
-        btn.grid(row=0, column=i)
-    label_scores.config(text=f"Human: {p1_points} | Computer: {p2_points}")
-    label_turn.config(text="Turn: " + ("Human" if current_player == 0 else "Computer"))
 
-def check_game_over():
-    if len(sequence) == 1:
-        if p1_points > p2_points:
-            result = "Human wins!"
-        elif p2_points > p1_points:
-            result = "Computer wins!"
+    def setup_game(self):
+        self.clear_window()
+
+        tk.Label(self.root, text="Cik ciparus ģenerēt?", font=("Helvetica", 12)).pack(pady=10)
+        self.entry_game_length = tk.Entry(self.root)
+        self.entry_game_length.pack(pady=5)
+
+        tk.Button(self.root, text="Ģenerēt spēli", command=self.start_game).pack(pady=10)
+        tk.Button(self.root, text="Atpakaļ", command=self.main_menu).pack(pady=5)
+
+
+    def start_game(self):
+        try:
+            game_length = int(self.entry_game_length.get())
+            if game_length < 2:
+                raise ValueError("Virknei jābūt vismaz 2 garai.")
+        except ValueError as e:
+            messagebox.showerror("Kļūda", f"Nav derīgs skaitlis: {e}")
+            return
+        
+        self.history = []  # ✅ CLEAR HISTORY
+        self.game = GameState(p1_turn=True, game_length=game_length)
+        self.update_game_screen()
+
+
+    def update_game_screen(self):
+        self.clear_window()
+
+        tk.Label(self.root, text="Spēles stāvoklis", font=("Helvetica", 14)).pack(pady=10)
+        tk.Label(self.root, text=f"Cipari: {self.game.board}").pack()
+        tk.Label(self.root, text=f"Punkti: {self.game.points}").pack()
+        tk.Label(self.root, text="Izvēlieties gājienu:").pack(pady=5)
+
+        move_list = self.game.available_moves()
+        self.move_buttons = []
+
+        for idx, move in enumerate(move_list):
+            btn = tk.Button(self.root, text=f"{idx+1}: {move}", command=lambda i=idx: self.make_move(i))
+            btn.pack(pady=2)
+            self.move_buttons.append(btn)
+
+        tk.Button(self.root, text="Atgriezties uz galveno izvēlni", command=self.main_menu).pack(pady=10)
+        tk.Label(self.root, text="").pack()
+        tk.Label(self.root, text="Gājienu vēsture:", font=("Helvetica", 10, "bold")).pack(pady=(10, 0))
+        for who, move, board, points in self.history[-6:]:  # show last 6 moves
+            text = f"{who} izvēlējās {move}: {board}, Punkti: {points}"
+            tk.Label(self.root, text=text, font=("Helvetica", 9)).pack()
+
+
+    def make_move(self, move_index):
+        valid = self.game.make_move(move_index + 1, self.game.p1_turn)
+        if not valid:
+            messagebox.showwarning("Nederīgs gājiens", "Šis gājiens nav atļauts.")
+            return
+
+        if self.game.game_over():
+            winner = self.game.winner()
+            result = "Uzvarēja spēlētājs!" if winner == 1 else "Uzvarēja dators!" if winner == 2 else "Neizšķirts!"
+            messagebox.showinfo("Spēles beigas", result)
+            self.main_menu()
         else:
-            result = "It's a tie!"
-        label_result.config(text=result)
-        btn_new_game.config(state=tk.NORMAL)
+            self.update_game_screen()
 
-def apply_move(index):
-    global sequence, p1_points, p2_points, current_player
-    # Merge pair at positions index and index+1
-    pair = [sequence[index], sequence[index+1]]
-    if pair == [0,0]:
-        if current_player == 0:
-            p1_points += 1
+    def clear_window(self):
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+        
+    def make_move(self, move_index):
+        move = move_index + 1
+        valid = self.game.make_move(move, self.game.p1_turn)
+        if not valid:
+            messagebox.showwarning("Nederīgs gājiens", "Šis gājiens nav atļauts.")
+            return
+
+        self.history.append(("Spēlētājs", move, self.game.board.copy(), self.game.points.copy()))
+
+        if self.game.game_over():
+            self.show_winner()
+        elif not self.game.p1_turn:
+            self.root.after(500, self.ai_move)
         else:
-            p2_points += 1
-        new_value = 1
-    elif pair == [0,1]:
-        if current_player == 0:
-            p2_points += 1
+            self.update_game_screen()
+
+
+    def ai_move(self):
+        node = GameStateNode(self.game.clone_state())
+        ai_choices = []
+
+        # Gather all possible moves and their evaluations
+        for child in node.generatechildren():
+            val, _ = alphabeta(child)
+            ai_choices.append((child.move, val))
+
+        # Sort by value (best first)
+        ai_choices.sort(key=lambda x: -x[1])
+
+        # Pick the best move
+        best_move = ai_choices[0][0]
+
+        # Show AI choices in the GUI
+        self.clear_window()
+        tk.Label(self.root, text="AI domā...", font=("Helvetica", 14)).pack(pady=10)
+        tk.Label(self.root, text=f"Aizdomātie gājieni:").pack()
+
+        for move, score in ai_choices:
+            color = "green" if move == best_move else "black"
+            text = f"{move}: vērtējums = {score:.2f}"
+            tk.Label(self.root, text=text, fg=color).pack()
+
+        # Wait a moment before executing the AI move (so player can see choice)
+        self.root.after(1500, lambda: self.execute_ai_move(best_move))
+
+
+    def execute_ai_move(self, move):
+        self.game.make_move(move, self.game.p1_turn)
+        self.history.append(("AI", move, self.game.board.copy(), self.game.points.copy()))
+        
+        if self.game.game_over():
+            self.show_winner()
         else:
-            p1_points += 1
-        new_value = 0
-    elif pair == [1,0]:
-        if current_player == 0:
-            p1_points += 1
-            p2_points -= 1
-        else:
-            p2_points += 1
-            p1_points -= 1
-        new_value = 1
-    elif pair == [1,1]:
-        new_value = 0
-    else:
-        return
+            self.update_game_screen()
 
-    sequence[index] = new_value
-    del sequence[index+1]
-    current_player = 1 - current_player
-    update_display()
-    check_game_over()
-    if current_player == 1 and len(sequence) > 1:
-        root.after(500, computer_move)
 
-def on_click(index):
-    global selected_index
-    if current_player != 0:
-        return  # Ignore clicks if not human turn
-    if selected_index is None:
-        selected_index = index
-    else:
-        if abs(selected_index - index) == 1:
-            first = min(selected_index, index)
-            apply_move(first)
-        selected_index = None
+    def show_winner(self):
+        winner = self.game.winner()
+        result = (
+            "Uzvarēja spēlētājs!" if winner == 1
+            else "Uzvarēja dators!" if winner == 2
+            else "Neizšķirts!"
+        )
 
-def computer_move():
-    global sequence, p1_points, p2_points, current_player
-    # Create a game state node from current state and scores.
-    node = GameStateNode(state=sequence.copy(), parent=None, move=None, depth=0,
-                         p1_points=p1_points, p2_points=p2_points, current_player=current_player)
-    algo_choice = var_algo.get()
-    if algo_choice == "minimax":
-        _, move = algo.minimax(node)
-    else:
-        _, move = algo.alphabeta(node)
-    if move is not None:
-        index = move[0]
-        apply_move(index)
-    else:
-        check_game_over()
+        self.clear_window()
+        tk.Label(self.root, text="Spēles beigas!", font=("Helvetica", 16, "bold")).pack(pady=10)
+        tk.Label(self.root, text=result, font=("Helvetica", 14)).pack(pady=5)
+        
+        # ✅ Show move history
+        tk.Label(self.root, text="Spēles gājienu vēsture:", font=("Helvetica", 12, "bold")).pack(pady=(15, 5))
+        for who, move, board, points in self.history:
+            text = f"{who} izvēlējās {move}: {board}, Punkti: {points}"
+            tk.Label(self.root, text=text, font=("Helvetica", 10)).pack()
 
-def start_game():
-    global sequence, p1_points, p2_points, current_player, selected_index
-    try:
-        length = int(entry_length.get())
-        if length < 15 or length > 25:
-            length = 15
-    except:
-        length = 15
-    sequence = generate_sequence(length)
-    p1_points = 0
-    p2_points = 0
-    current_player = var_first.get()  # 0: human first; 1: computer first
-    selected_index = None
-    label_result.config(text="")
-    btn_new_game.config(state=tk.DISABLED)
-    update_display()
-    if current_player == 1:
-        root.after(500, computer_move)
+        tk.Button(self.root, text="Atgriezties uz izvēlni", command=self.main_menu).pack(pady=15)
 
-def new_game():
-    start_game()
 
-# Layout
-frame_top = tk.Frame(root)
-frame_top.pack(pady=10)
-
-tk.Label(frame_top, text="Enter sequence length (15-25):").grid(row=0, column=0, padx=5)
-entry_length = tk.Entry(frame_top)
-entry_length.grid(row=0, column=1, padx=5)
-entry_length.insert(0, "15")
-
-# Choose starting player
-var_first = tk.IntVar(value=0)
-tk.Radiobutton(frame_top, text="Human First", variable=var_first, value=0).grid(row=1, column=0)
-tk.Radiobutton(frame_top, text="Computer First", variable=var_first, value=1).grid(row=1, column=1)
-
-# Choose algorithm
-var_algo = tk.StringVar(value="minimax")
-tk.Label(frame_top, text="Algorithm:").grid(row=2, column=0, padx=5)
-tk.Radiobutton(frame_top, text="Minimax", variable=var_algo, value="minimax").grid(row=2, column=1)
-tk.Radiobutton(frame_top, text="Alpha-Beta", variable=var_algo, value="alphabeta").grid(row=2, column=2)
-
-tk.Button(frame_top, text="Start Game", command=start_game).grid(row=3, column=0, columnspan=3, pady=10)
-
-frame_buttons = tk.Frame(root)
-frame_buttons.pack(pady=10)
-
-label_scores = tk.Label(root, text="Human: 0 | Computer: 0", font=("Arial", 14))
-label_scores.pack()
-
-label_turn = tk.Label(root, text="Turn: ", font=("Arial", 14))
-label_turn.pack()
-
-label_result = tk.Label(root, text="", font=("Arial", 16, "bold"))
-label_result.pack(pady=10)
-
-btn_new_game = tk.Button(root, text="New Game", command=new_game, state=tk.DISABLED)
-btn_new_game.pack(pady=5)
-
-root.mainloop()
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = NumberGameGUI(root)
+    root.mainloop()
