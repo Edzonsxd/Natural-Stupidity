@@ -6,6 +6,7 @@ class GameStateNode:
         self.move = move    # Gājiens no iepriešējā stāvokļa uz šo stāvokli
         self.children = []  # Pēcteču saraksts
         self.depth = depth  # Virsotnes dziļums kokā
+        self.score = state.evaluate()  # Gājiena vērtējums
 
     def add_child(self, node):
         self.children.append(node)
@@ -44,5 +45,3 @@ class GameStateTree:
         for child in node.children:
             self.print_tree(child, indent + "    ")    
 
-if __name__ == "__main__":
-    print("Palaid main.py nevis šo, mīļumiņ!")

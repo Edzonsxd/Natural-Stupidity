@@ -4,13 +4,13 @@ class GameState:
     def __init__(self, p1_turn, game_length=0, debug=False):
         if debug:
             # STATISKA ciparu virkne debugošanai
-            self.board = [0, 1, 0, 1, 0]
+            self.board = [0, 1, 0, 1, 0, 0]
         else:
             # Uzģenērē ciparu virkni spēles sākumam
             self.board = [ random.randint(0, 1) for i in range(game_length) ]  
 
         # Abu spēlētāju punkti glabājas vārdnīcā, manuprāt, vieglākai piekļuvei
-        self.points =  {1: 0, 2: 0} 
+        self.points = {1: 0, 2: 0} 
         self.p1_turn = p1_turn # BOOL - T, ja p1, F, ja p2
 
     def print_state(self):
@@ -28,7 +28,28 @@ class GameState:
 
     def available_moves(self):
         board = self.board
-        return [[board[i], board[i+1]] for i in range(len(board)-1)]
+        return [(board[i], board[i+1]) for i in range(len(board)-1)]
+    
+    def evaluate(self):
+        # Punktu starpība starp spēlētājiem (Galvenais faktors)
+        point_diff = self.points[1] - self.points[2]
+
+        moves = self.available_moves()
+        # Visi labie gājieni (palielina punktu starpību pret pretinieku)
+        good_moves = [m for m in moves if m in [(0, 0), (1, 0)]]
+
+        # Koeficients, ja pēc pretinieka gājiena, spēlētājam varētu palikt labs gājiens
+        good_moves_count = len(good_moves)
+        good_moves_coef = good_moves_count if good_moves_count % 2 == 0 else 0
+
+        # (0, 0) labāks, jo tas atdod 1 (objektīvi sliktāks cipars)
+        move_score = sum(1 for m in good_moves if m == (0, 0)) + good_moves_coef
+
+        # Ja mans gājiens tad kruta, ja pretineka gājiens tad nav kruta
+        turn_coef = 1 if self.p1_turn else -1
+        score = point_diff + 0.4 * move_score * turn_coef
+
+        return (score, point_diff, move_score)
     
     def make_move(self, position, p1_turn):
         if self.game_over():
@@ -81,5 +102,3 @@ class GameState:
         
 if __name__ == "__main__":
     print("Palaid main.py nevis šo, mīļumiņ!")
-
-        
