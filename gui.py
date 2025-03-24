@@ -69,6 +69,7 @@ class NumberGameGUI:
         for who, move, board, points in self.history[-6:]:  # show last 6 moves
             text = f"{who} izvēlējās {move}: {board}, Punkti: {points}"
             tk.Label(self.root, text=text, font=("Helvetica", 9)).pack()
+        tk.Button(self.root, text="Eksportēt AI spēles koku", command=self.export_current_tree).pack(pady=5)
 
 
     def make_move(self, move_index):
@@ -108,7 +109,9 @@ class NumberGameGUI:
 
 
     def ai_move(self):
-        node = GameStateNode(self.game.clone_state())
+        tree = GameStateTree()
+        tree.create_tree(self.game.clone_state(), max_depth=2)
+        node = tree.root
         ai_choices = []
 
         # Gather all possible moves and their evaluations
@@ -165,6 +168,13 @@ class NumberGameGUI:
             tk.Label(self.root, text=text, font=("Helvetica", 10)).pack()
 
         tk.Button(self.root, text="Atgriezties uz izvēlni", command=self.main_menu).pack(pady=15)
+
+    def export_current_tree(self):
+        from tree import GameStateTree
+        tree = GameStateTree()
+        tree.create_tree(self.game.clone_state(), max_depth=3)  # or more if needed
+        tree.export_tree_to_file("exported_game_tree.txt")
+        messagebox.showinfo("Eksportēts", "Spēles koks ir saglabāts kā 'exported_game_tree.txt'")
 
 
 if __name__ == "__main__":

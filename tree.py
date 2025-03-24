@@ -1,5 +1,6 @@
 from gamestate import GameState
 
+
 class GameStateNode:
     def __init__(self, state, move=None, depth=0):
         self.state = state
@@ -66,3 +67,16 @@ class GameStateTree:
             self.print_tree(child, indent + "    ")    
 
 
+def export_tree_to_file(self, filename="game_tree.txt"):
+    with open(filename, "w", encoding="utf-8") as f:
+        self._export_node(self.root, f)
+
+def _export_node(self, node, file, indent=""):
+    move_info = f"Gājiens: {node.move}" if node.move is not None else "Sākuma stāvoklis"
+    score, diff, good = node.state.evaluate()
+    file.write(f"{indent}Dziļums: {node.depth} | {move_info} | Valde: {node.state.board} | Punkti: {node.state.points} | Vērtējums: {score:.2f}\n")
+    for child in node.children:
+        self._export_node(child, file, indent + "    ")
+
+GameStateTree.export_tree_to_file = export_tree_to_file
+GameStateTree._export_node = _export_node
