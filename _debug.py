@@ -1,3 +1,4 @@
+# ChatGPT kods
 def export_tree_to_dot(game_tree, filename="tree.dot"):
     """
     Export the game state tree to a DOT file for visualization with Graphviz.

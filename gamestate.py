@@ -1,7 +1,7 @@
 import random
 
 class GameState:
-    def __init__(self, p1_turn, game_length=0, debug=False):
+    def __init__(self, ai_turn, game_length=0, debug=False):
         if debug:
             # STATISKA ciparu virkne debugošanai
             self.board = [0, 1, 0, 1, 0, 0]
@@ -11,7 +11,7 @@ class GameState:
 
         # Abu spēlētāju punkti glabājas vārdnīcā, manuprāt, vieglākai piekļuvei
         self.points = {1: 0, 2: 0} 
-        self.p1_turn = p1_turn # BOOL - T, ja p1, F, ja p2
+        self.ai_turn = ai_turn # BOOL - T, ja sāk dators, F, ja sāk cilvēks
 
     def print_state(self):
         print(self.board)
@@ -19,11 +19,11 @@ class GameState:
 
     # Metode sevis klonēšanai, nepieciešama kokam
     def clone_state(self):
-        new_state = GameState(self.p1_turn) # Inicializē jaunu, tukšu spēles stāvokli 
+        new_state = GameState(self.ai_turn) # Inicializē jaunu, tukšu spēles stāvokli 
         # Iekopē visus atribūtus
         new_state.board = self.board.copy()
         new_state.points = self.points.copy()
-        new_state.p1_turn = self.p1_turn
+        new_state.ai_turn = self.ai_turn
         return new_state
 
     def available_moves(self):
@@ -46,12 +46,20 @@ class GameState:
         move_score = sum(1 for m in good_moves if m == (0, 0)) + good_moves_coef
 
         # Ja mans gājiens tad kruta, ja pretineka gājiens tad nav kruta
-        turn_coef = 1 if self.p1_turn else -1
+        turn_coef = 1 if self.ai_turn else -1
         score = point_diff + 0.4 * move_score * turn_coef
 
-        return (score, point_diff, move_score)
+        return score
     
-    def make_move(self, position, p1_turn):
+    # Pie lielāka koka mazāks dziļums
+    def dynamic_depth(self):
+        moves_left = len(self.available_moves())
+        if moves_left > 10:
+            return 4
+        else:
+            return 6    
+    
+    def make_move(self, position, ai_turn):
         if self.game_over():
             return False
         
@@ -60,8 +68,8 @@ class GameState:
             return False
 
         # nosaka pašreizējo spēlētāju un pretinieku
-        player = 1 if p1_turn else 2
-        opponent = 2 if p1_turn else 1
+        player = 1 if ai_turn else 2
+        opponent = 2 if ai_turn else 1
 
         pair = available_moves[position-1]
         replacement = None
@@ -83,7 +91,7 @@ class GameState:
 
         # Izgriež ciparu pāri no virknes un aizstāj to
         self.board = self.board[:position-1] + [replacement] + self.board[position+1:]
-        self.p1_turn = not self.p1_turn
+        self.ai_turn = not self.ai_turn
         return True
         
     def game_over(self):
@@ -94,7 +102,7 @@ class GameState:
             return None
 
         if self.points[1] > self.points[2]:
-            return 1 # 1. spēlētājs 
+            return 1 # 1. spēlētājs (dators)
         elif self.points[2] > self.points[1]:
             return 2 # 2. spēlētājs
         else:

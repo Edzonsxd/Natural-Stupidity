@@ -1,14 +1,17 @@
 import math
 
 def minimax(node):
-    if node.is_terminal():
-        return node.evaluate(), None
+    if node.state.game_over():
+        return node.state.evaluate(), None
+    
+    if not node.children:
+        return node.state.evaluate(), None
 
-    if node.current_player == 1:  # Computer's turn: maximizer
+    if node.state.ai_turn:  # Computer's turn: maximizer
         best_val = -math.inf
         best_move = None
-        for child in node.generatechildren():
-            val,  = minimax(child)
+        for child in node.children:
+            val, _ = minimax(child)
             if val > best_val:
                 best_val = val
                 best_move = child.move
@@ -16,22 +19,25 @@ def minimax(node):
     else:  # Human's turn: minimizer
         best_val = math.inf
         best_move = None
-        for child in node.generatechildren():
-            val,  = minimax(child)
+        for child in node.children:
+            val, _ = minimax(child)
             if val < best_val:
                 best_val = val
                 best_move = child.move
         return best_val, best_move
 
 def alphabeta(node, alpha=-math.inf, beta=math.inf):
-    if node.is_terminal():
-        return node.evaluate(), None
+    if node.state.game_over():
+        return node.state.evaluate(), None
+    
+    if not node.children:
+        return node.state.evaluate(), None
 
-    if node.current_player == 1:  # Maximizer turn (computer)
+    if node.state.ai_turn:  # Maximizer turn (computer)
         best_val = -math.inf
         best_move = None
-        for child in node.generatechildren():
-            val, move = alphabeta(child, alpha, beta)
+        for child in node.children:
+            val, _ = alphabeta(child, alpha, beta)
             if val > best_val:
                 best_val = val
                 best_move = child.move
@@ -42,8 +48,8 @@ def alphabeta(node, alpha=-math.inf, beta=math.inf):
     else:  # Minimizer turn (human)
         best_val = math.inf
         best_move = None
-        for child in node.generatechildren():
-            val, move = alphabeta(child, alpha, beta)
+        for child in node.children:
+            val, _ = alphabeta(child, alpha, beta)
             if val < best_val:
                 best_val = val
                 best_move = child.move
@@ -51,10 +57,6 @@ def alphabeta(node, alpha=-math.inf, beta=math.inf):
             if beta <= alpha:
                 break
         return best_val, best_move
-
-import random
-def random_move(game):
-    return random.randint(1, len(game.available_moves()))
 
 if __name__ == "__main__":
     print("Palaid main.py nevis šo, mīļumiņ!")
