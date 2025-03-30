@@ -11,9 +11,6 @@ class GameStateNode:
     def add_child(self, node):
         self.children.append(node)
 
-    def is_terminal(self):
-        return self.state.game_over()
-
 class GameStateTree:
     def __init__(self):
         self.root = None
