@@ -74,19 +74,18 @@ class GameState:
         pair = available_moves[position-1]
         replacement = None
 
-        if pair[0] == pair[1]: # situācija, kad cipari ir vienādi
-            if pair[0] == 0:            
+        match pair:
+            case (0, 0):
                 self.points[player] += 1     # [0, 0] -> 1, + punkts sev
                 replacement = 1
-            else:                       
+            case (1, 1):
                 self.points[player] -= 1     # [1, 1] -> 0, - punkts sev
                 replacement = 0
-        else: # kad cipari ir atšķirīgi
-            if pair[0] == 0:
-                self.points[opponent] += 1     # [0, 1] -> 0, + punkts pretiniekam
+            case (0, 1):
+                self.points[opponent] += 1   # [0, 1] -> 0, + punkts pretiniekam
                 replacement = 0
-            else:
-                self.points[opponent] -= 1     # [1, 0] -> 1, - punkts pretiniekam
+            case (1, 0):
+                self.points[opponent] -= 1   # [1, 0] -> 1, - punkts pretiniekam
                 replacement = 1
 
         # Izgriež ciparu pāri no virknes un aizstāj to
