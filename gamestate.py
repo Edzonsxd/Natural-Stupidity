@@ -9,7 +9,7 @@ class GameState:
             # Uzģenērē ciparu virkni spēles sākumam
             self.board = [ random.randint(0, 1) for i in range(game_length) ]  
 
-        # Abu spēlētāju punkti glabājas vārdnīcā, manuprāt, vieglākai piekļuvei
+        # Abu spēlētāju punkti glabājas vārdnīcā, vieglākai piekļuvei
         self.points = {1: 0, 2: 0} 
         self.ai_turn = ai_turn # BOOL - T, ja sāk dators, F, ja sāk cilvēks
 

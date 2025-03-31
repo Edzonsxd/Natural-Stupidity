@@ -12,6 +12,7 @@ def initialize_game(game_length, ai_start):
 
 if __name__ == "__main__":
     while True:
+        total_visited_nodes = [0]
         game_length = int(input("Ievadiet spēles garumu: "))
         ai_start = input("Vai dators sāk spēli? (y/n): ").strip().lower() == 'y'
         algo_input = int(input("Izvēlieties algoritmu (1 - Minimax, 2 - Alpha-Beta): "))
@@ -42,7 +43,7 @@ if __name__ == "__main__":
             # Katrā datora gājienā pārtaisa spēles koku
             if game.ai_turn:
                 game_tree.create_tree(game)
-                _, move = algo(game_tree.root)
+                _, move = algo(game_tree.root, total_visited_nodes)
                 print(f"Dators veic gājienu: { move }, izmantojot algoritmu: { algo.__name__ }")
             else:
                 move = int(input("Ievadiet gājiena numuru: "))
@@ -57,6 +58,7 @@ if __name__ == "__main__":
 
         print(f"{ 'Uzvarēja dators' if game.winner() == 1 else 'Uzvarēja spēlētājs' if game.winner() == 2 else 'neizšķirts' }")
         game.print_state()
+        print(f"Apmeklēto virsotņu skaits: {total_visited_nodes}")
 
         if input("Atkārtot spēli? (y/n): ").strip().lower() != 'y':
             break

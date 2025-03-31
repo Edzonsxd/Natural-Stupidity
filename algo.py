@@ -1,6 +1,6 @@
 import math
 
-def minimax(node):
+def minimax(node, total_visited_nodes):
     if node.state.game_over():
         return node.state.evaluate(), None
     
@@ -11,7 +11,8 @@ def minimax(node):
         best_val = -math.inf
         best_move = None
         for child in node.children:
-            val, _ = minimax(child)
+            total_visited_nodes[0] += 1
+            val, _ = minimax(child, total_visited_nodes)
             if val > best_val:
                 best_val = val
                 best_move = child.move
@@ -20,13 +21,14 @@ def minimax(node):
         best_val = math.inf
         best_move = None
         for child in node.children:
-            val, _ = minimax(child)
+            total_visited_nodes[0] += 1
+            val, _ = minimax(child, total_visited_nodes)
             if val < best_val:
                 best_val = val
                 best_move = child.move
         return best_val, best_move
 
-def alphabeta(node, alpha=-math.inf, beta=math.inf):
+def alphabeta(node, total_visited_nodes, alpha=-math.inf, beta=math.inf):
     if node.state.game_over():
         return node.state.evaluate(), None
     
@@ -37,7 +39,8 @@ def alphabeta(node, alpha=-math.inf, beta=math.inf):
         best_val = -math.inf
         best_move = None
         for child in node.children:
-            val, _ = alphabeta(child, alpha, beta)
+            val, _ = alphabeta(child, total_visited_nodes, alpha, beta)
+            total_visited_nodes[0] += 1
             if val > best_val:
                 best_val = val
                 best_move = child.move
@@ -49,7 +52,8 @@ def alphabeta(node, alpha=-math.inf, beta=math.inf):
         best_val = math.inf
         best_move = None
         for child in node.children:
-            val, _ = alphabeta(child, alpha, beta)
+            total_visited_nodes[0] += 1
+            val, _ = alphabeta(child, total_visited_nodes, alpha, beta)
             if val < best_val:
                 best_val = val
                 best_move = child.move

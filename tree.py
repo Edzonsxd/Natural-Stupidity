@@ -27,7 +27,7 @@ class GameStateTree:
         if node.depth >= max_depth or node.state.game_over():
             return
         
-        # Par katru iespējamo gājienu izveido pēcteča mezglu
+        # Par katru iespējamo gājienu izveido pēcteča virsotni
         for position in range (1, len(node.state.available_moves()) + 1):
             # Noklonē stāvokli, lai neietekmētu oriģinālo
             node_state = node.state.clone_state()
