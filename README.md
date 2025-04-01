@@ -1,5 +1,8 @@
 # Natural-Stupidity
 ### RTU RDBD0 2.kursa priekšmeta MI pamati 1. praktiskā darba 14. komandas darba koda krātuve
+----------------
+#### Spēles palaišanai jāizmanto `main.py` fails. Ir iespēja pailaist konsoles versiju caur `cli.py`
+---------------
 
 1) Cilvēks **norāda** spēlē izmantojamas skaitļu **virknes garumu**, kas var būt diapazonā **no 15 līdz 25** skaitļiem. 
 
@@ -43,11 +46,11 @@ Tādējādi izstrādājot darbu, studentu komandai ir jāizpilda šādi soļi:
 
 - [x] Jāizvēlas programmēšanas vide/valoda;
 
-- [ ] Jāizveido datu struktūra spēles stāvokļu glabāšanai;
+- [x] Jāizveido datu struktūra spēles stāvokļu glabāšanai;
 
-- [ ] Jāprojektē, jārealizē un jātestē spēles algoritmi;
+- [x] Jāprojektē, jārealizē un jātestē spēles algoritmi;
 
-- [ ] Jāveic eksperimenti ar abiem algoritmiem;
+- [x] Jāveic eksperimenti ar abiem algoritmiem;
 
 - [ ] Jāsagatavo atskaite par izstrādāto spēli un tā ir jāiesniedz e-studiju kursā;
 
@@ -55,6 +58,6 @@ Tādējādi izstrādājot darbu, studentu komandai ir jāizpilda šādi soļi:
 
 - [ ] Jāveic komandas dalībnieku savstarpējā vērtēšana;
 
-- [ ] Jāpiesakās aizstāvēšanas laikam;
+- [x] Jāpiesakās aizstāvēšanas laikam;
 
 - [ ] Jāaizstāv izstrādātais darbs.

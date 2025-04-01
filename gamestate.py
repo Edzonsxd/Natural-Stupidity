@@ -57,8 +57,9 @@ class GameState:
         if moves_left > 10:
             return 4
         else:
-            return 6    
-    
+            return 6
+            
+    # Funkcija gājiena veikšanai - atgriež T vai F, atkarībā, vai gājiens tiek veikts
     def make_move(self, position, ai_turn):
         if self.game_over():
             return False

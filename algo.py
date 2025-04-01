@@ -7,7 +7,7 @@ def minimax(node, total_visited_nodes):
     if not node.children:
         return node.state.evaluate(), None
 
-    if node.state.ai_turn:  # Computer's turn: maximizer
+    if node.state.ai_turn:  # Maksimizētāja gājiens (spēlētājs)
         best_val = -math.inf
         best_move = None
         for child in node.children:
@@ -17,7 +17,7 @@ def minimax(node, total_visited_nodes):
                 best_val = val
                 best_move = child.move
         return best_val, best_move
-    else:  # Human's turn: minimizer
+    else:  # Minimizētāja gājiens (pretinieks)
         best_val = math.inf
         best_move = None
         for child in node.children:
@@ -35,7 +35,7 @@ def alphabeta(node, total_visited_nodes, alpha=-math.inf, beta=math.inf):
     if not node.children:
         return node.state.evaluate(), None
 
-    if node.state.ai_turn:  # Maximizer turn (computer)
+    if node.state.ai_turn:  # Maksimizētāja gājiens (spēlētājs)
         best_val = -math.inf
         best_move = None
         for child in node.children:
@@ -48,7 +48,7 @@ def alphabeta(node, total_visited_nodes, alpha=-math.inf, beta=math.inf):
             if beta <= alpha:
                 break
         return best_val, best_move
-    else:  # Minimizer turn (human)
+    else:   # Minimizētāja gājiens (pretinieks)
         best_val = math.inf
         best_move = None
         for child in node.children:

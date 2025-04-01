@@ -1,5 +1,3 @@
-from gamestate import GameState
-
 class GameStateNode:
     def __init__(self, state, move=None, depth=0):
         self.state = state  # Spēles stāvoklis

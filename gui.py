@@ -111,3 +111,6 @@ class GameGUI:
         self.history_text.insert(tk.END, text + "\n")
         self.history_text.see(tk.END)
         self.history_text.config(state="disabled")
+
+if __name__ == "__main__":
+    print("Palaid main.py nevis šo, mīļumiņ!")
