@@ -1,183 +1,113 @@
 import tkinter as tk
 from tkinter import messagebox
-from gamestate import GameState
-from tree import GameStateTree
-from algo import random_move
-from algo import alphabeta  # make sure this is imported
-from tree import GameStateNode
 
-class NumberGameGUI:
-    def __init__(self, root):
+
+### PIEZĪME: Grafiskā saskarne izveidota ar ChatGPT palīdzību. 
+### Izvēle tika veikta šāda, jo sāka pietrūkt laiks, un tas neietekmē pašu spēles loģiku.
+class GameGUI:
+    def __init__(self, root, controller):
         self.root = root
-        self.root.title("Skaitļu spēle")
-        self.main_menu()
-        self.history = []  # Stores tuples like ("Spēlētājs", move, state)
+        self.controller = controller
+        self.root.title("0-1 Game")
 
-    def main_menu(self):
-        # Clear any existing widgets
-        self.clear_window()
-
-        tk.Label(self.root, text="Laipni lūdzam skaitļu spēlē!", font=("Helvetica", 16)).pack(pady=20)
-        tk.Button(self.root, text="Sākt spēli", width=20, command=self.setup_game).pack(pady=10)
-        tk.Button(self.root, text="Iziet", width=20, command=self.root.quit).pack(pady=10)
-
-
-    def setup_game(self):
-        self.clear_window()
-
-        tk.Label(self.root, text="Cik ciparus ģenerēt?", font=("Helvetica", 12)).pack(pady=10)
-        self.entry_game_length = tk.Entry(self.root)
-        self.entry_game_length.pack(pady=5)
-
-        tk.Button(self.root, text="Ģenerēt spēli", command=self.start_game).pack(pady=10)
-        tk.Button(self.root, text="Atpakaļ", command=self.main_menu).pack(pady=5)
-
-
-    def start_game(self):
-        try:
-            game_length = int(self.entry_game_length.get())
-            if game_length < 2:
-                raise ValueError("Virknei jābūt vismaz 2 garai.")
-        except ValueError as e:
-            messagebox.showerror("Kļūda", f"Nav derīgs skaitlis: {e}")
-            return
-        
-        self.history = []  # ✅ CLEAR HISTORY
-        self.game = GameState(p1_turn=True, game_length=game_length)
-        self.update_game_screen()
-
-
-    def update_game_screen(self):
-        self.clear_window()
-
-        tk.Label(self.root, text="Spēles stāvoklis", font=("Helvetica", 14)).pack(pady=10)
-        tk.Label(self.root, text=f"Cipari: {self.game.board}").pack()
-        tk.Label(self.root, text=f"Punkti: {self.game.points}").pack()
-        tk.Label(self.root, text="Izvēlieties gājienu:").pack(pady=5)
-
-        move_list = self.game.available_moves()
+        self.setup_screen = None
+        self.board_frame = None
         self.move_buttons = []
 
-        for idx, move in enumerate(move_list):
-            btn = tk.Button(self.root, text=f"{idx+1}: {move}", command=lambda i=idx: self.make_move(i))
-            btn.pack(pady=2)
-            self.move_buttons.append(btn)
+        self.show_setup_screen()
 
-        tk.Button(self.root, text="Atgriezties uz galveno izvēlni", command=self.main_menu).pack(pady=10)
-        tk.Label(self.root, text="").pack()
-        tk.Label(self.root, text="Gājienu vēsture:", font=("Helvetica", 10, "bold")).pack(pady=(10, 0))
-        for who, move, board, points in self.history[-6:]:  # show last 6 moves
-            text = f"{who} izvēlējās {move}: {board}, Punkti: {points}"
-            tk.Label(self.root, text=text, font=("Helvetica", 9)).pack()
-        tk.Button(self.root, text="Eksportēt AI spēles koku", command=self.export_current_tree).pack(pady=5)
+    def show_setup_screen(self):
+        self.clear_root()
 
+        self.setup_screen = tk.Frame(self.root)
+        self.setup_screen.pack(padx=20, pady=20)
 
-    def make_move(self, move_index):
-        valid = self.game.make_move(move_index + 1, self.game.p1_turn)
-        if not valid:
-            messagebox.showwarning("Nederīgs gājiens", "Šis gājiens nav atļauts.")
-            return
+        tk.Label(self.setup_screen, text="Spēles garums (15–25):").pack()
+        self.length_entry = tk.Entry(self.setup_screen)
+        self.length_entry.pack(pady=5)
 
-        if self.game.game_over():
-            winner = self.game.winner()
-            result = "Uzvarēja spēlētājs!" if winner == 1 else "Uzvarēja dators!" if winner == 2 else "Neizšķirts!"
-            messagebox.showinfo("Spēles beigas", result)
-            self.main_menu()
-        else:
-            self.update_game_screen()
+        tk.Label(self.setup_screen, text="Kurš sāk spēli?").pack()
+        self.turn = tk.StringVar(value="player")
+        tk.Radiobutton(self.setup_screen, text="Spēlētājs", variable=self.turn, value="player").pack()
+        tk.Radiobutton(self.setup_screen, text="Dators", variable=self.turn, value="ai").pack()
 
-    def clear_window(self):
+        tk.Label(self.setup_screen, text="Izvēlieties algoritmu:").pack()
+        self.algo_var = tk.StringVar(value="alphabeta")
+        tk.Radiobutton(self.setup_screen, text="Minimax", variable=self.algo_var, value="minimax").pack()
+        tk.Radiobutton(self.setup_screen, text="Alpha-Beta", variable=self.algo_var, value="alphabeta").pack()
+
+        tk.Button(self.setup_screen, text="Sākt spēli", command=self.controller.start_game_from_setup).pack(pady=10)
+
+    def clear_root(self):
         for widget in self.root.winfo_children():
             widget.destroy()
 
-        
-    def make_move(self, move_index):
-        move = move_index + 1
-        valid = self.game.make_move(move, self.game.p1_turn)
-        if not valid:
-            messagebox.showwarning("Nederīgs gājiens", "Šis gājiens nav atļauts.")
-            return
+    def setup_game_screen(self):
+        self.clear_root()
 
-        self.history.append(("Spēlētājs", move, self.game.board.copy(), self.game.points.copy()))
+        self.info_label = tk.Label(self.root, text="", font=("Arial", 14))
+        self.info_label.pack(pady=10)
 
-        if self.game.game_over():
-            self.show_winner()
-        elif not self.game.p1_turn:
-            self.root.after(500, self.ai_move)
+        self.board_frame = tk.Frame(self.root)
+        self.board_frame.pack(pady=10)
+
+        self.control_frame = tk.Frame(self.root)
+        self.control_frame.pack()
+
+        self.restart_button = tk.Button(self.control_frame, text="Jauna spēle", command=self.show_setup_screen)
+        self.restart_button.pack()
+
+        self.history_frame = tk.Frame(self.root)
+        self.history_frame.pack(pady=5)
+
+        tk.Label(self.history_frame, text="Gājienu vēsture:", font=("Arial", 12)).pack()
+
+        self.history_text = tk.Text(self.history_frame, width=60, height=10, state="disabled", wrap="none")
+        self.history_text.pack(side="left")
+
+        scrollbar = tk.Scrollbar(self.history_frame, command=self.history_text.yview)
+        scrollbar.pack(side="right", fill="y")
+        self.history_text.config(yscrollcommand=scrollbar.set)
+
+    def update_board(self, board, moves=None, highlight_index=None):
+        for widget in self.board_frame.winfo_children():
+            widget.destroy()
+
+        for idx, val in enumerate(board):
+            color = "lightgreen" if idx == highlight_index else "white"
+            cell = tk.Label(self.board_frame, text=str(val), width=3, font=("Arial", 16),
+                            bg=color, relief="ridge", borderwidth=2)
+            cell.grid(row=0, column=idx, padx=1, pady=2)
+
+        if moves is not None:
+            self.draw_move_buttons(moves)
         else:
-            self.update_game_screen()
+            self.clear_move_buttons()
 
+    def draw_move_buttons(self, moves):
+        self.clear_move_buttons()
+        for idx, move in enumerate(moves):
+            btn = tk.Button(self.board_frame, text=f"{move}", command=lambda i=idx+1: self.controller.make_move(i))
+            btn.grid(row=1, column=idx, padx=1, pady=2)
+            self.move_buttons.append(btn)
 
-    def ai_move(self):
-        tree = GameStateTree()
-        tree.create_tree(self.game.clone_state(), max_depth=2)
-        node = tree.root
-        ai_choices = []
+    def clear_move_buttons(self):
+        for btn in self.move_buttons:
+            btn.destroy()
+        self.move_buttons = []
 
-        # Gather all possible moves and their evaluations
-        for child in node.generatechildren():
-            val, _ = alphabeta(child)
-            ai_choices.append((child.move, val))
+    def update_info(self, text):
+        self.info_label.config(text=text)
 
-        # Sort by value (best first)
-        ai_choices.sort(key=lambda x: -x[1])
-
-        # Pick the best move
-        best_move = ai_choices[0][0]
-
-        # Show AI choices in the GUI
-        self.clear_window()
-        tk.Label(self.root, text="AI domā...", font=("Helvetica", 14)).pack(pady=10)
-        tk.Label(self.root, text=f"Aizdomātie gājieni:").pack()
-
-        for move, score in ai_choices:
-            color = "green" if move == best_move else "black"
-            text = f"{move}: vērtējums = {score:.2f}"
-            tk.Label(self.root, text=text, fg=color).pack()
-
-        # Wait a moment before executing the AI move (so player can see choice)
-        self.root.after(1500, lambda: self.execute_ai_move(best_move))
-
-
-    def execute_ai_move(self, move):
-        self.game.make_move(move, self.game.p1_turn)
-        self.history.append(("AI", move, self.game.board.copy(), self.game.points.copy()))
-        
-        if self.game.game_over():
-            self.show_winner()
-        else:
-            self.update_game_screen()
-
-
-    def show_winner(self):
-        winner = self.game.winner()
-        result = (
-            "Uzvarēja spēlētājs!" if winner == 1
-            else "Uzvarēja dators!" if winner == 2
-            else "Neizšķirts!"
-        )
-
-        self.clear_window()
-        tk.Label(self.root, text="Spēles beigas!", font=("Helvetica", 16, "bold")).pack(pady=10)
-        tk.Label(self.root, text=result, font=("Helvetica", 14)).pack(pady=5)
-        
-        # ✅ Show move history
-        tk.Label(self.root, text="Spēles gājienu vēsture:", font=("Helvetica", 12, "bold")).pack(pady=(15, 5))
-        for who, move, board, points in self.history:
-            text = f"{who} izvēlējās {move}: {board}, Punkti: {points}"
-            tk.Label(self.root, text=text, font=("Helvetica", 10)).pack()
-
-        tk.Button(self.root, text="Atgriezties uz izvēlni", command=self.main_menu).pack(pady=15)
-
-    def export_current_tree(self):
-        from tree import GameStateTree
-        tree = GameStateTree()
-        tree.create_tree(self.game.clone_state(), max_depth=3)  # or more if needed
-        tree.export_tree_to_file("exported_game_tree.txt")
-        messagebox.showinfo("Eksportēts", "Spēles koks ir saglabāts kā 'exported_game_tree.txt'")
-
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = NumberGameGUI(root)
-    root.mainloop()
+    def game_over(self, winner, final_state, total_nodes):
+        msg = f"Spēle beigusies! Uzvarēja: {'Dators' if winner == 1 else 'Spēlētājs' if winner == 2 else 'Neizšķirts'}\n"
+        msg += f"Punkti: {final_state.points}\n"
+        msg += f"Datora apskatīto virsotņu skaits: {total_nodes}"
+        messagebox.showinfo("Rezultāts", msg)
+        self.clear_move_buttons()
+    
+    def add_move_to_history(self, text):
+        self.history_text.config(state="normal")
+        self.history_text.insert(tk.END, text + "\n")
+        self.history_text.see(tk.END)
+        self.history_text.config(state="disabled")
