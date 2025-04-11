@@ -52,12 +52,12 @@ Tādējādi izstrādājot darbu, studentu komandai ir jāizpilda šādi soļi:
 
 - [x] Jāveic eksperimenti ar abiem algoritmiem;
 
-- [ ] Jāsagatavo atskaite par izstrādāto spēli un tā ir jāiesniedz e-studiju kursā;
+- [x] Jāsagatavo atskaite par izstrādāto spēli un tā ir jāiesniedz e-studiju kursā;
 
-- [ ] Jāatbild uz jautājumiem par mākslīgā intelekta rīku izmantošanu spēles izstrādē;
+- [x] Jāatbild uz jautājumiem par mākslīgā intelekta rīku izmantošanu spēles izstrādē;
 
-- [ ] Jāveic komandas dalībnieku savstarpējā vērtēšana;
+- [x] Jāveic komandas dalībnieku savstarpējā vērtēšana;
 
 - [x] Jāpiesakās aizstāvēšanas laikam;
 
-- [ ] Jāaizstāv izstrādātais darbs.
+- [x] Jāaizstāv izstrādātais darbs.
